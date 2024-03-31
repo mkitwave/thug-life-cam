@@ -8,7 +8,14 @@ const videoSize = {
 function App() {
   return (
     <main>
-      <Webcam width={videoSize.width} height={videoSize.height} />
+      <div className="webcam-container">
+        <Webcam width={videoSize.width} height={videoSize.height} />
+        <canvas
+          width={videoSize.width}
+          height={videoSize.height}
+          className="filter-canvas"
+        />
+      </div>
     </main>
   );
 }
