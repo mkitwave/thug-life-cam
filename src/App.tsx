@@ -1,4 +1,5 @@
 import Webcam from "react-webcam";
+import "./app.css";
 
 const videoSize = {
   width: 640,
