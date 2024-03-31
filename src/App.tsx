@@ -9,6 +9,12 @@ const videoSize = {
   height: 480,
 };
 
+const facePoint = {
+  leftEyeTop: 124,
+  rightEyeTop: 276,
+  leftEyeBottom: 111,
+};
+
 const loadDetectionModel = () => {
   return faceLandmarksDetection.createDetector(
     faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh,
@@ -19,12 +25,6 @@ const loadDetectionModel = () => {
       solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh",
     },
   );
-};
-
-const facePoint = {
-  leftEyeTop: 124,
-  rightEyeTop: 276,
-  leftEyeBottom: 111,
 };
 
 const calculateFilterPosition = (
@@ -67,12 +67,16 @@ function App() {
     if (!video) return;
 
     model.estimateFaces(video).then((face) => {
+      if (!face[0]) {
+        ctx.clearRect(0, 0, videoSize.width, videoSize.height);
+        requestAnimationFrame(() => estimateFaces(model, image, ctx));
+        return;
+      }
+
       const { x, y, width, height } = calculateFilterPosition(
         face[0].keypoints,
       );
-      ctx.clearRect(0, 0, videoSize.width, videoSize.height);
       ctx.drawImage(image, x, y, width, height);
-
       requestAnimationFrame(() => estimateFaces(model, image, ctx));
     });
   };
