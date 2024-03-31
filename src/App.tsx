@@ -1,3 +1,4 @@
+import "@mediapipe/face_mesh";
 import "@tensorflow/tfjs-core";
 import Webcam from "react-webcam";
 import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
@@ -22,7 +23,7 @@ const loadDetectionModel = () => {
       runtime: "mediapipe",
       maxFaces: 2,
       refineLandmarks: false,
-      solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh",
+      solutionPath: "node_modules/@mediapipe/face_mesh",
     },
   );
 };
