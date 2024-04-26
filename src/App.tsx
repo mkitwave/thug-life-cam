@@ -1,62 +1,26 @@
 import "@mediapipe/face_mesh";
-import "@tensorflow/tfjs-core";
-import Webcam from "react-webcam";
 import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
-import { useEffect, useRef } from "react";
+import "@tensorflow/tfjs-backend-webgl";
+import "@tensorflow/tfjs-core";
+
+import { useEffect, useRef, useState } from "react";
+import Webcam from "react-webcam";
 import "./app.css";
+import { calculateFilterPosition } from "./calculate-filter-position";
+import { loadDetectionModel } from "./load-detection-model";
 
 const videoSize = {
   width: 640,
   height: 480,
 };
 
-const facePoint = {
-  leftEyeTop: 124,
-  rightEyeTop: 276,
-  leftEyeBottom: 111,
-};
-
-const loadDetectionModel = () => {
-  return faceLandmarksDetection.createDetector(
-    faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh,
-    {
-      runtime: "mediapipe",
-      maxFaces: 2,
-      refineLandmarks: false,
-      solutionPath: "node_modules/@mediapipe/face_mesh",
-    },
-  );
-};
-
-const calculateFilterPosition = (
-  keypoints: faceLandmarksDetection.Keypoint[],
-) => {
-  const xPadding = 30;
-  const yPadding = 10;
-
-  const x = keypoints[facePoint.leftEyeTop].x - xPadding;
-  const y = keypoints[facePoint.leftEyeTop].y - yPadding;
-  const width =
-    keypoints[facePoint.rightEyeTop].x -
-    keypoints[facePoint.leftEyeTop].x +
-    xPadding * 2;
-  const height =
-    keypoints[facePoint.leftEyeBottom].y -
-    keypoints[facePoint.leftEyeTop].y +
-    yPadding * 2;
-
-  return {
-    x,
-    y,
-    width,
-    height,
-  };
-};
-
 function App() {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const initialLoadedRef = useRef<boolean>(false);
+  const [status, setStatus] = useState<
+    "Initializing..." | "Load Model..." | "Model Loaded"
+  >("Initializing...");
 
   const estimateFaces = (
     model: faceLandmarksDetection.FaceLandmarksDetector,
@@ -68,32 +32,31 @@ function App() {
     if (!video) return;
 
     model.estimateFaces(video).then((face) => {
-      if (!face[0]) {
-        ctx.clearRect(0, 0, videoSize.width, videoSize.height);
-        requestAnimationFrame(() => estimateFaces(model, image, ctx));
-        return;
+      ctx.clearRect(0, 0, videoSize.width, videoSize.height);
+      if (face[0]) {
+        const { x, y, width, height } = calculateFilterPosition(
+          face[0].keypoints,
+        );
+        ctx.drawImage(image, x, y, width, height);
       }
-
-      const { x, y, width, height } = calculateFilterPosition(
-        face[0].keypoints,
-      );
-      ctx.drawImage(image, x, y, width, height);
       requestAnimationFrame(() => estimateFaces(model, image, ctx));
     });
   };
 
   useEffect(() => {
-    const video = webcamRef.current?.video;
     const canvasContext = canvasRef.current?.getContext("2d");
 
-    if (!video || !canvasContext || initialLoadedRef.current) return;
+    if (!canvasContext || initialLoadedRef.current) return;
 
     initialLoadedRef.current = true;
 
     const image = new Image();
     image.src = "sunglasses.png";
 
+    setStatus("Load Model...");
+
     loadDetectionModel().then((model) => {
+      setStatus("Model Loaded");
       requestAnimationFrame(() => estimateFaces(model, image, canvasContext));
     });
   }, []);
@@ -113,6 +76,7 @@ function App() {
           className="filter-canvas"
         />
       </div>
+      <p className="status">{status}</p>
     </main>
   );
 }
