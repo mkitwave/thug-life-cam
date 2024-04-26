@@ -1,4 +1,6 @@
 import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
+import "@tensorflow/tfjs-backend-webgl";
+import "@tensorflow/tfjs-core";
 
 export const loadDetectionModel = () => {
   return faceLandmarksDetection.createDetector(

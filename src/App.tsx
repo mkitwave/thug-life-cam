@@ -1,7 +1,4 @@
-import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
-import "@tensorflow/tfjs-backend-webgl";
-import "@tensorflow/tfjs-core";
-
+import { type FaceLandmarksDetector } from "@tensorflow-models/face-landmarks-detection";
 import { useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import "./app.css";
@@ -21,8 +18,8 @@ function App() {
     "Initializing..." | "Load Model..." | "Model Loaded"
   >("Initializing...");
 
-  const estimateFaces = (
-    model: faceLandmarksDetection.FaceLandmarksDetector,
+  const estimateFacesLoop = (
+    model: FaceLandmarksDetector,
     image: HTMLImageElement,
     ctx: CanvasRenderingContext2D,
   ) => {
@@ -38,7 +35,7 @@ function App() {
         );
         ctx.drawImage(image, x, y, width, height);
       }
-      requestAnimationFrame(() => estimateFaces(model, image, ctx));
+      requestAnimationFrame(() => estimateFacesLoop(model, image, ctx));
     });
   };
 
@@ -56,7 +53,9 @@ function App() {
 
     loadDetectionModel().then((model) => {
       setStatus("Model Loaded");
-      requestAnimationFrame(() => estimateFaces(model, image, canvasContext));
+      requestAnimationFrame(() =>
+        estimateFacesLoop(model, image, canvasContext),
+      );
     });
   }, []);
 
