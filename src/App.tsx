@@ -1,4 +1,3 @@
-import "@mediapipe/face_mesh";
 import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
 import "@tensorflow/tfjs-backend-webgl";
 import "@tensorflow/tfjs-core";

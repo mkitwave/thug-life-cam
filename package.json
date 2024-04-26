@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@mediapipe/face_mesh": "^0.4.1633559619",
     "@tensorflow-models/face-landmarks-detection": "^1.0.5",
     "@tensorflow/tfjs-backend-webgl": "^4.18.0",
     "@tensorflow/tfjs-core": "^4.17.0",
